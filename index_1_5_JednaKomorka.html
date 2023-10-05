@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <title>Gra w życie v 1.5 - Soft Max</title>
+ <meta charset="utf-8" />
+</head>
+ 
+<body>
+<h1>Gra w życie - wersja 1.5</h1>    
+
+<canvas id="plansza_canvas" width="400px" height="200px">
+</canvas>
+
+<script>
+ let plansza, rysowanie;
+ plansza = document.getElementById("plansza_canvas");
+ rysowanie = plansza.getContext("2d");  
+
+let rozmiar_planszy_x = plansza.width,     rozmiar_planszy_y = plansza.height;
+let ile_komorek_x = 10,             ile_komorek_y = 5;
+ile_komorek_x += 2; ile_komorek_y += 2;
+
+let rozmiar_komorki_x = rozmiar_planszy_x / (ile_komorek_x-2);
+let rozmiar_komorki_y = rozmiar_planszy_y / (ile_komorek_y-2);
+let x, y;
+let STAN_MARTWA_KOMORKA = 0, STAN_ZYWA_KOMORKA = 1;
+let KOLOR_MARTWA_KOMORKA = "rgb(0,255,255)", KOLOR_ZYWA_KOMORKA = "rgb(255,0,255)";
+
+
+function UstawTlo() {
+   rysowanie.fillStyle = KOLOR_MARTWA_KOMORKA; 
+   rysowanie.fillRect(0,0, rozmiar_planszy_x,rozmiar_planszy_y); 
+}
+
+function RysujKomorke(x,y,czy_zywa) {
+   if (czy_zywa == STAN_MARTWA_KOMORKA)
+      rysowanie.fillStyle = KOLOR_MARTWA_KOMORKA;
+   else
+      rysowanie.fillStyle = KOLOR_ZYWA_KOMORKA;
+   let lewy_gorny_x = rozmiar_komorki_x * x;
+   let lewy_gorny_y = rozmiar_komorki_y * y;
+   rysowanie.fillRect(lewy_gorny_x, lewy_gorny_y, rozmiar_komorki_x,rozmiar_komorki_y); 
+}
+
+
+ UstawTlo();
+ x = 1; y = 1;
+ RysujKomorke( x-1, y-1, 1	 );
+
+
+
+</script>
+
+
+</body> 
+
+</html>
+
+
