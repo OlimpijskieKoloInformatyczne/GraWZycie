@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+ <title>Gra w życie v 1.4 - Soft Max</title>
+ <meta charset="utf-8" />
+</head>
+ 
+<body>
+<h1>Gra w życie - wersja 1.4</h1>    
+
+<canvas id="plansza_canvas" width="400px" height="200px">
+</canvas>
+
+<script>
+ let plansza, rysowanie;
+ plansza = document.getElementById("plansza_canvas");
+ rysowanie = plansza.getContext("2d");  
+ 
+ const rozmiar_planszy_x = plansza.width, rozmiar_planszy_y = plansza.height;
+ const KOLOR_MARTWA_KOMORKA = "rgb(0,255,255)";
+
+
+function UstawTlo() {
+   rysowanie.fillStyle = KOLOR_MARTWA_KOMORKA; 
+   rysowanie.fillRect(0,0, rozmiar_planszy_x,rozmiar_planszy_y); 
+}
+
+ UstawTlo();
+
+</script>
+
+
+</body> 
+
+</html>
+
