@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<!--
+Gra w życie  v. 1.7 by Soft Maxi
+Kod / omowienie / etapy: https://oki.org.pl/gra-w-zycie/
+-->
+<html>
+<head>
+ <title>Gra w życie v 1.8 - Softi Maxi</title>
+ <meta charset="utf-8" />
+</head>
+ 
+<body>
+<h1>To jest GRA W ŻYCIE 1.8</h1>    
+
+
+<div>
+<fieldset style="width: 500px; margin-bottom: 25px;">
+    <legend>Ilość komórek</legend>
+    <label>Poziomo:</label>
+    <input type="range" min="5" max="200" value="50" id="suwak_liczba_komorek_X" oninput="ZmianaLiczbyKomorek_X()">
+    <label id="akt_wartosc_suwak_X">50</label>
+    <label style="margin-left: 20px;">Pionowo:</label>
+    <input type="range" min="5" max="200" value="20" id="suwak_liczba_komorek_Y" oninput="ZmianaLiczbyKomorek_Y()">
+    <label id="akt_wartosc_suwak_Y">50</label>
+</fieldset>
+</div>
+
+<div style="margin-bottom: 25px;">
+    <button onclick="LosoweKomorki()">
+    Losuj komórki
+    </button>
+   <button style="margin-left: 15px;" onclick="CzyscPlansze()">
+   Czyść planszę
+   </button>
+</div>
+<div style="margin-bottom: 25px;">
+    <label>Górny X:</label>
+    <input type="number" value="2" id="dakota_gora_X">
+    <label style="margin-left: 15px;">Górny Y:</label>
+    <input type="number" value="2" id="dakota_gora_Y" style="margin-bottom: 5px;" >
+<br/>
+    <button onclick="GenerujSzybowiec()">
+    Generuj Szybowiec
+    </button>
+</div>
+
+
+<div>
+   <button style="margin-bottom: 25px;" onclick="StartGry()">
+   START!
+   </button>
+</div>
+
+<canvas id="plansza_canvas" width="400px" height="200px">
+</canvas>
+
+<script>
+ let plansza, rysowanie;
+ plansza = document.getElementById("plansza_canvas");
+ rysowanie = plansza.getContext("2d");  
+
+let uchwyt_animacji;
+
+let rozmiar_planszy_x = plansza.width,     rozmiar_planszy_y = plansza.height;
+let ile_komorek_x, ile_komorek_y;
+let rozmiar_komorki_x, rozmiar_komorki_y;
+let x, y;
+let STAN_MARTWA_KOMORKA = 0, STAN_ZYWA_KOMORKA = 1;
+let KOLOR_MARTWA_KOMORKA = "rgb(0,255,255)", KOLOR_ZYWA_KOMORKA = "rgb(255,0,255)";
+
+let tablica_zyc = [];
+let nowa_tablica_zyc = [];
+
+function ZmianaLiczbyKomorek_X() {
+   document.getElementById("akt_wartosc_suwak_X").innerHTML = 
+   document.getElementById("suwak_liczba_komorek_X").value;
+}
+
+function ZmianaLiczbyKomorek_Y() {
+   document.getElementById("akt_wartosc_suwak_Y").innerHTML = 
+   document.getElementById("suwak_liczba_komorek_Y").value;
+}
+
+function UstawTlo() {
+   rysowanie.fillStyle = KOLOR_MARTWA_KOMORKA; 
+   rysowanie.fillRect(0,0, rozmiar_planszy_x,rozmiar_planszy_y); 
+}
+
+function RysujKomorke(x,y,czy_zywa) {
+   if (czy_zywa == STAN_MARTWA_KOMORKA)
+      rysowanie.fillStyle = KOLOR_MARTWA_KOMORKA;
+   else
+      rysowanie.fillStyle = KOLOR_ZYWA_KOMORKA;
+   let lewy_gorny_x = rozmiar_komorki_x * (x-1);
+   let lewy_gorny_y = rozmiar_komorki_y * (y-1);
+   rysowanie.fillRect(lewy_gorny_x, lewy_gorny_y, rozmiar_komorki_x,rozmiar_komorki_y); 
+}
+
+function LosujKomorki() {
+   for (x=1; x <= ile_komorek_x-2; ++x) 
+      for (y=1; y<=ile_komorek_y-2; ++y) 
+         tablica_zyc[x][y] = Math.round(Math.random());
+}
+
+function UstawMartweKomorki() {
+   for (x=1; x <= ile_komorek_x-2; ++x) 
+      for (y=1; y<=ile_komorek_y-2; ++y) 
+         tablica_zyc[x][y] = STAN_MARTWA_KOMORKA;
+}
+
+function ObliczWartoscKomorkiWKolejnejGeneracji(x,y) {
+   let suma = 0;
+   for (x_akt=(x-1); x_akt<=x+1; ++x_akt)
+      for (y_akt=(y-1); y_akt<=y+1; ++y_akt)
+         suma += tablica_zyc[x_akt][y_akt];
+   
+   suma -= tablica_zyc[x][y];
+   
+   if ( tablica_zyc[x][y] == STAN_MARTWA_KOMORKA ) {
+      if (suma == 3) 
+         return STAN_ZYWA_KOMORKA;
+      return STAN_MARTWA_KOMORKA;
+   }
+   
+   if ( suma == 2 )  
+      return STAN_ZYWA_KOMORKA;
+   if ( suma == 3 )  
+      return STAN_ZYWA_KOMORKA;
+   return STAN_MARTWA_KOMORKA;      
+}
+
+function ObliczNastepnaGeneracjeWszystkichKomorek() {
+   for (x=1; x<=(ile_komorek_x-2); ++x) 
+      for (y=1; y<=(ile_komorek_y-2); ++y) 
+         nowa_tablica_zyc[x][y] = ObliczWartoscKomorkiWKolejnejGeneracji(x,y);
+
+   for (x=1; x<=ile_komorek_x-2; ++x) 
+      for (y=1; y<=ile_komorek_y-2; ++y) 
+         tablica_zyc[x][y] = nowa_tablica_zyc[x][y];
+}
+
+function RysujKomorki() {
+   for (x=1; x<=(ile_komorek_x-2); ++x) 
+      for (y=1; y<=(ile_komorek_y-2); ++y) 
+         RysujKomorke( x, y, tablica_zyc[x][y] );
+}
+
+function Animacja() {
+   RysujKomorki();
+   ObliczNastepnaGeneracjeWszystkichKomorek();
+}
+
+function UstawParametryGry() {
+   ile_komorek_x = parseInt(document.getElementById("suwak_liczba_komorek_X").value);
+   ile_komorek_y = parseInt(document.getElementById("suwak_liczba_komorek_Y").value);
+   ile_komorek_x += 2; ile_komorek_y += 2;
+   rozmiar_komorki_x = rozmiar_planszy_x / (ile_komorek_x-2);
+   rozmiar_komorki_y = rozmiar_planszy_y / (ile_komorek_y-2);
+   for (x=0; x<ile_komorek_x; ++x)
+      tablica_zyc[x] = [];
+   for (x=0; x<ile_komorek_x; ++x)
+      nowa_tablica_zyc[x] = [];
+}
+
+
+function GenerujSzybowiec() {
+   let act_x = parseInt(document.getElementById("dakota_gora_X").value);
+   let act_y = parseInt(document.getElementById("dakota_gora_Y").value);
+   clearInterval(uchwyt_animacji);
+
+//Linia1 
+   tablica_zyc[act_x][act_y] = STAN_ZYWA_KOMORKA;   
+//Linia2 
+   tablica_zyc[act_x+1][act_y+1] = STAN_ZYWA_KOMORKA;   
+   tablica_zyc[act_x+2][act_y+1] = STAN_ZYWA_KOMORKA;   
+//Linia3
+   tablica_zyc[act_x][act_y+2] = STAN_ZYWA_KOMORKA;   
+   tablica_zyc[act_x+1][act_y+2] = STAN_ZYWA_KOMORKA;   
+
+   RysujKomorki();
+}
+
+function LosoweKomorki() {
+   clearInterval(uchwyt_animacji);
+   UstawParametryGry();
+   UstawTlo();
+   LosujKomorki();
+   RysujKomorki();
+}
+
+function StartGry() {
+   clearInterval(uchwyt_animacji);
+   uchwyt_animacji = setInterval(Animacja, 10);
+}
+
+function CzyscPlansze() {
+   UstawParametryGry()
+   UstawMartweKomorki();
+   UstawTlo();
+}
+
+CzyscPlansze();
+
+</script>
+</body> 
+</html>
+
